@@ -1,6 +1,8 @@
 # MicroFlex-Architecture
 **MicroFlex Architecture** is a comprehensive project designed to showcase the deployment and management of a microservices-based application using Docker for containerization and Kubernetes for orchestration. The project aims to demonstrate best practices in creating, scaling, and managing containerized microservices efficiently.
 
+![diagram](https://github.com/danielamoh1/MicroFlex-Architecture/assets/160555417/fc18f499-5ce9-4d54-b235-5ead6da8ea9c)
+
 #### Project Overview:
 
 **MicroFlex Architecture** provides a hands-on approach to understanding how to leverage Docker and Kubernetes in a real-world application scenario. The project focuses on setting up a multi-service application environment, where each microservice performs a distinct role within the application ecosystem.
