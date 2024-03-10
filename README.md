@@ -61,6 +61,111 @@
 - Kubernetes cluster
 - kubectl configured
 
+### **INSTALLING KUBERNETES AND DOCKER ON CentOS**
+Installing Kubernetes on a CentOS Linux system involves several key steps, from setting up the Docker container engine to installing Kubernetes itself. Here’s a comprehensive, step-by-step guide to achieve this:
+
+### Step 1: Update Your System
+First, ensure your system packages are up-to-date. This step enhances security and performance.
+
+```markdown
+sudo yum update -y
+```
+
+### Step 2: Disable SELinux
+SELinux might interfere with Kubernetes components. Temporarily disabling it ensures smoother installation and operation.
+
+```markdown
+sudo setenforce 0
+sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+```
+
+### Step 3: Install Docker
+Kubernetes requires a container runtime, and Docker is a popular choice. Install Docker to manage the containers.
+
+```markdown
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install -y docker-ce docker-ce-cli containerd.io
+```
+
+### Step 4: Start and Enable Docker
+Ensure Docker starts at boot and is currently running.
+
+```markdown
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+### Step 5: Configure Kubernetes Repository
+Kubernetes packages are not available in the default CentOS repositories. Add the Kubernetes repository manually.
+
+```markdown
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+```
+
+### Step 6: Install Kubernetes
+Now, you can install Kubernetes components: `kubelet`, `kubeadm`, and `kubectl`.
+
+```markdown
+sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+```
+
+### Step 7: Start and Enable kubelet
+The `kubelet` service needs to be started and enabled to run on boot.
+
+```markdown
+sudo systemctl start kubelet
+sudo systemctl enable kubelet
+```
+
+### Step 8: Disable Swap
+Kubernetes doesn't work with swap memory enabled. Disable it to avoid issues.
+
+```markdown
+sudo swapoff -a
+sudo sed -i '/ swap / s/^/#/' /etc/fstab
+```
+
+### Step 9: Initialize Kubernetes Cluster
+Use `kubeadm` to initialize your Kubernetes cluster. Adjust `--pod-network-cidr` based on the network plugin you plan to use.
+
+```markdown
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+```
+
+### Step 10: Configure kubectl
+After initializing the cluster, set up the local kubeconfig to use `kubectl` for cluster management.
+
+```markdown
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+### Step 11: Deploy a Pod Network
+Kubernetes requires a pod network for containers to communicate. Flannel is a simple choice.
+
+```markdown
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+```
+
+### Final Steps and Verification
+After completing the installation, verify the cluster status.
+
+```markdown
+kubectl get nodes
+```
+
+You should see your node listed as "Ready," indicating a successful Kubernetes installation on your CentOS system. This guide provides a straightforward approach to setting up Kubernetes, but always refer to the official Kubernetes documentation for the most up-to-date practices and troubleshooting tips.
+
 ### Deployment
 
 1. **Build Docker Images**
