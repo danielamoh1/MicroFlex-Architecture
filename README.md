@@ -53,3 +53,32 @@
 **MicroFlex Architecture** is an ambitious project that not only highlights technical expertise in Docker and Kubernetes but also offers valuable insights into managing complex, distributed systems. It serves as a robust demonstration of skills relevant to cloud-native development and operations.
 
 === **STEP BY STEP PRACTICAL WALKTHROUGH OF THE PROJECT BELOW** ===
+
+
+### Prerequisites
+
+- Docker
+- Kubernetes cluster
+- kubectl configured
+
+### Deployment
+
+1. **Build Docker Images**
+   Navigate to each service directory and build Docker images.
+   ```bash
+   docker build -t microflex/frontend ./services/frontend
+   docker build -t microflex/backend ./services/backend
+   ```
+2. **Deploy to Kubernetes**
+Use the YAML files in the kubernetes/ directory to deploy your services.
+```bash
+kubectl apply -f kubernetes/frontend-deployment.yaml
+kubectl apply -f kubernetes/backend-deployment.yaml
+```
+3. Scaling Services
+Kubernetes allows for easy scaling of services. To scale your backend service, use:
+```bash
+kubectl scale deployment backend --replicas=3
+```
+**Monitoring and Logging**
+Setup Prometheus and Grafana for monitoring, and ELK Stack for logging. Configuration files are provided in the monitoring/ directory.
