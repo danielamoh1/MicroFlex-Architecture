@@ -51,3 +51,5 @@
    - Best practices for maintaining and scaling microservices architectures.
 
 **MicroFlex Architecture** is an ambitious project that not only highlights technical expertise in Docker and Kubernetes but also offers valuable insights into managing complex, distributed systems. It serves as a robust demonstration of skills relevant to cloud-native development and operations.
+
+=== **STEP BY STEP PRACTICAL WALKTHROUGH OF THE PROJECT** ===
