@@ -100,8 +100,7 @@ touch microflex/monitoring/grafana-dashboard.json
 
 2. Dockerfiles for Microservices
 Frontend Dockerfile (microflex/services/frontend/Dockerfile)
-dockerfile
-```bash
+```dockerfile
 # Use a node base image
 FROM node:14
 
@@ -120,9 +119,9 @@ COPY . .
 # Expose port and start application
 EXPOSE 8080
 CMD [ "npm", "start" ]
-Backend Dockerfile (microflex/services/backend/Dockerfile)
-dockerfile
-Copy code
+```
+3. Backend Dockerfile (microflex/services/backend/Dockerfile)
+```dockerfile
 # Use a Python base image
 FROM python:3.8
 
@@ -143,7 +142,7 @@ EXPOSE 5000
 CMD [ "python", "./app.py" ]
 ```
 
-3. Kubernetes Deployment Configurations
+4. Kubernetes Deployment Configurations
 Frontend Deployment (microflex/kubernetes/frontend-deployment.yaml)
 ```yaml
 apiVersion: apps/v1
