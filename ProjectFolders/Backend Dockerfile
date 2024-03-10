@@ -1,0 +1,18 @@
+# Use a Python base image
+FROM python:3.8
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy the dependencies file
+COPY requirements.txt .
+
+# Install any dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Bundle app source
+COPY . .
+
+# Expose port and start application
+EXPOSE 5000
+CMD [ "python", "./app.py" ]
