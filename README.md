@@ -61,111 +61,6 @@
 - Kubernetes cluster
 - kubectl configured
 
-### **INSTALLING KUBERNETES AND DOCKER ON CentOS**
-Installing Kubernetes on a CentOS Linux system involves several key steps, from setting up the Docker container engine to installing Kubernetes itself. Here’s a comprehensive, step-by-step guide to achieve this:
-
-### Step 1: Update Your System
-First, ensure your system packages are up-to-date. This step enhances security and performance.
-
-```markdown
-sudo yum update -y
-```
-
-### Step 2: Disable SELinux
-SELinux might interfere with Kubernetes components. Temporarily disabling it ensures smoother installation and operation.
-
-```markdown
-sudo setenforce 0
-sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
-```
-
-### Step 3: Install Docker
-Kubernetes requires a container runtime, and Docker is a popular choice. Install Docker to manage the containers.
-
-```markdown
-sudo yum install -y yum-utils
-sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum install -y docker-ce docker-ce-cli containerd.io
-```
-
-### Step 4: Start and Enable Docker
-Ensure Docker starts at boot and is currently running.
-
-```markdown
-sudo systemctl start docker
-sudo systemctl enable docker
-```
-
-### Step 5: Configure Kubernetes Repository
-Kubernetes packages are not available in the default CentOS repositories. Add the Kubernetes repository manually.
-
-```markdown
-cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOF
-```
-
-### Step 6: Install Kubernetes
-Now, you can install Kubernetes components: `kubelet`, `kubeadm`, and `kubectl`.
-
-```markdown
-sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
-```
-
-### Step 7: Start and Enable kubelet
-The `kubelet` service needs to be started and enabled to run on boot.
-
-```markdown
-sudo systemctl start kubelet
-sudo systemctl enable kubelet
-```
-
-### Step 8: Disable Swap
-Kubernetes doesn't work with swap memory enabled. Disable it to avoid issues.
-
-```markdown
-sudo swapoff -a
-sudo sed -i '/ swap / s/^/#/' /etc/fstab
-```
-
-### Step 9: Initialize Kubernetes Cluster
-Use `kubeadm` to initialize your Kubernetes cluster. Adjust `--pod-network-cidr` based on the network plugin you plan to use.
-
-```markdown
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16
-```
-
-### Step 10: Configure kubectl
-After initializing the cluster, set up the local kubeconfig to use `kubectl` for cluster management.
-
-```markdown
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-```
-
-### Step 11: Deploy a Pod Network
-Kubernetes requires a pod network for containers to communicate. Flannel is a simple choice.
-
-```markdown
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-```
-
-### Final Steps and Verification
-After completing the installation, verify the cluster status.
-
-```markdown
-kubectl get nodes
-```
-
-You should see your node listed as "Ready," indicating a successful Kubernetes installation on your CentOS system. This guide provides a straightforward approach to setting up Kubernetes, but always refer to the official Kubernetes documentation for the most up-to-date practices and troubleshooting tips.
-
 ### Deployment
 
 1. **Build Docker Images**
@@ -187,3 +82,317 @@ kubectl scale deployment backend --replicas=3
 ```
 **Monitoring and Logging**
 Setup Prometheus and Grafana for monitoring, and ELK Stack for logging. Configuration files are provided in the monitoring/ directory.
+
+To complete the "MicroFlex Architecture" project as outlined, follow these detailed steps and content guidelines for each component:
+
+1. **Project Structure Setup**
+First, create the necessary directories to organize your project:
+
+```bash
+mkdir -p microflex/{services/frontend,services/backend,kubernetes,scripts,monitoring}
+touch microflex/services/frontend/Dockerfile
+touch microflex/services/backend/Dockerfile
+touch microflex/kubernetes/frontend-deployment.yaml
+touch microflex/kubernetes/backend-deployment.yaml
+touch microflex/monitoring/prometheus.yaml
+touch microflex/monitoring/grafana-dashboard.json
+```
+
+2. Dockerfiles for Microservices
+Frontend Dockerfile (microflex/services/frontend/Dockerfile)
+dockerfile
+```bash
+# Use a node base image
+FROM node:14
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install project dependencies
+RUN npm install
+
+# Bundle app source
+COPY . .
+
+# Expose port and start application
+EXPOSE 8080
+CMD [ "npm", "start" ]
+Backend Dockerfile (microflex/services/backend/Dockerfile)
+dockerfile
+Copy code
+# Use a Python base image
+FROM python:3.8
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy the dependencies file
+COPY requirements.txt .
+
+# Install any dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Bundle app source
+COPY . .
+
+# Expose port and start application
+EXPOSE 5000
+CMD [ "python", "./app.py" ]
+```
+
+3. Kubernetes Deployment Configurations
+Frontend Deployment (microflex/kubernetes/frontend-deployment.yaml)
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: microflex/frontend
+        ports:
+        - containerPort: 8080
+Backend Deployment (microflex/kubernetes/backend-deployment.yaml)
+yaml
+Copy code
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: microflex/backend
+        ports:
+        - containerPort: 5000
+```
+
+####### Utility Scripts for Database Migrations or Cleanup Tasks
+Location: microflex/scripts/ #####
+
+Example Cleanup Script (microflex/scripts/cleanup.sh)
+```bash
+#!/bin/bash
+# Cleanup script to remove temporary files
+
+echo "Starting cleanup..."
+# Replace /path/to/temp with the actual path to temporary files
+find /path/to/temp -type f -name '*.tmp' -delete
+echo "Cleanup completed."
+```
+**Example Database Migration Script (microflex/scripts/migrate.sh)**
+```bash
+#!/bin/bash
+# Database migration script
+
+echo "Starting database migration..."
+# Replace these variables with your actual database credentials and paths
+DATABASE_USER="user"
+DATABASE_PASSWORD="password"
+DATABASE_NAME="microflex_db"
+MIGRATIONS_PATH="/path/to/migrations"
+
+# Run migrations
+mysql -u "$DATABASE_USER" -p"$DATABASE_PASSWORD" "$DATABASE_NAME" < "$MIGRATIONS_PATH/migration.sql"
+echo "Database migration completed."
+```
+###Prometheus Configuration for Monitoring###
+Location: microflex/monitoring/prometheus.yaml
+
+Prometheus Configuration Example (microflex/monitoring/prometheus.yaml)
+```yaml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'microflex-backend'
+    static_configs:
+      - targets: ['backend-service:5000']
+
+  - job_name: 'microflex-frontend'
+    static_configs:
+      - targets: ['frontend-service:8080']
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+           - 'alertmanager:9093'
+
+rule_files:
+  - "alert_rules.yml"
+```
+###Example Alert Rules (microflex/monitoring/alert_rules.yml)###
+```yaml
+groups:
+- name: example
+  rules:
+  - alert: HighRequestLatency
+    expr: job:request_latency_seconds:mean5m{job="microflex-backend"} > 0.5
+    for: 10m
+    labels:
+      severity: page
+    annotations:
+      summary: High request latency on microflex-backend
+```
+Grafana Dashboard Configuration for Visualizing Metrics
+Location: microflex/monitoring/grafana-dashboard.json
+
+Since the Grafana dashboard configuration is a JSON model exported from the Grafana UI, it's recommended to design your dashboard directly in Grafana, tailored to the specific metrics you're monitoring with Prometheus, and then export the configuration. Here's a simple example of what the content might look like:
+
+**Example Grafana Dashboard Configuration (microflex/monitoring/grafana-dashboard.json)**
+```json
+{
+  "dashboard": {
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [],
+    "panels": [
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 2,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "format": "time_series",
+            "intervalFactor": 2,
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "HTTP Requests Rate",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      }
+    ],
+    "schemaVersion": 16,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-5m",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "timezone": "",
+    "title": "MicroFlex Dashboard",
+    "uid": "new",
+    "version": 1
+  },
+  "__inputs": [],
+  "__requires": []
+}
+```
+This JSON is just a basic template. Your actual dashboard should be designed according to the specific metrics you're monitoring, and then you can export the JSON model from the Grafana UI.
