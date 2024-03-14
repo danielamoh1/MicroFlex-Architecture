@@ -167,7 +167,7 @@ spec:
         ports:
         - containerPort: 8080
 ```
-Backend Deployment (microflex/kubernetes/backend-deployment.yaml)
+5. Backend Deployment (microflex/kubernetes/backend-deployment.yaml)
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -193,7 +193,7 @@ spec:
 ####### Utility Scripts for Database Migrations or Cleanup Tasks
 Location: microflex/scripts/ #####
 
-Example Cleanup Script (microflex/scripts/cleanup.sh)
+6. Example Cleanup Script (microflex/scripts/cleanup.sh)
 ```bash
 #!/bin/bash
 # Cleanup script to remove temporary files
@@ -203,7 +203,7 @@ echo "Starting cleanup..."
 find /path/to/temp -type f -name '*.tmp' -delete
 echo "Cleanup completed."
 ```
-**Example Database Migration Script (microflex/scripts/migrate.sh)**
+7. **Example Database Migration Script (microflex/scripts/migrate.sh)**
 ```bash
 #!/bin/bash
 # Database migration script
@@ -222,7 +222,7 @@ echo "Database migration completed."
 ###Prometheus Configuration for Monitoring###
 Location: microflex/monitoring/prometheus.yaml
 
-Prometheus Configuration Example (microflex/monitoring/prometheus.yaml)
+7. Prometheus Configuration Example (microflex/monitoring/prometheus.yaml)
 ```yaml
 global:
   scrape_interval: 15s
@@ -245,7 +245,7 @@ alerting:
 rule_files:
   - "alert_rules.yml"
 ```
-###Example Alert Rules (microflex/monitoring/alert_rules.yml)###
+8. ###Example Alert Rules (microflex/monitoring/alert_rules.yml)###
 ```yaml
 groups:
 - name: example
@@ -263,7 +263,7 @@ Location: microflex/monitoring/grafana-dashboard.json
 
 Since the Grafana dashboard configuration is a JSON model exported from the Grafana UI, it's recommended to design your dashboard directly in Grafana, tailored to the specific metrics you're monitoring with Prometheus, and then export the configuration. Here's a simple example of what the content might look like:
 
-**Example Grafana Dashboard Configuration (microflex/monitoring/grafana-dashboard.json)**
+9. **Example Grafana Dashboard Configuration (microflex/monitoring/grafana-dashboard.json)**
 ```json
 {
   "dashboard": {
