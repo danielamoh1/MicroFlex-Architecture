@@ -166,9 +166,9 @@ spec:
         image: microflex/frontend
         ports:
         - containerPort: 8080
+```
 Backend Deployment (microflex/kubernetes/backend-deployment.yaml)
-yaml
-Copy code
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
